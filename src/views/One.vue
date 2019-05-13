@@ -1,47 +1,59 @@
 <template>
     <div>
         <el-carousel :interval="5000" arrow="always" :type="carouselType">
-            <el-carousel-item v-for="item in 4" :key="item">
-                <h3>{{ item }}</h3>
+            <el-carousel-item v-for="(item,index) in hotList" :key="index">
+                <el-image :src="item.cover" layz ></el-image>
+                <h3>{{ item.name }}</h3>
             </el-carousel-item>
         </el-carousel>
         <div>
             <el-row :gutter="10">
-                <el-col :xs="12" :sm="8" :md="6" :lg="4" :xl="2" v-for="(o) in 8" :key="o">
+                <el-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="(item,index) in hotList" :key="index" >
+                    <router-link :to="{ name: 'two', params: { id: item.id }}">
                     <el-card :body-style="{ padding: '0px' }">
-                        <img src="https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png" class="image">
+                        <el-image :src="item.cover" ></el-image>
                         <div>
-                            <span>好吃的汉堡</span>
-                            <div class="bottom clearfix">
-                                <el-button type="text" class="button">操作按钮</el-button>
-                            </div>
+                            <span>{{item.name}}</span>
                         </div>
                     </el-card>
+                    </router-link>
                 </el-col>
             </el-row>
         </div>
-        我是One
-        <el-row>
-            <el-button @click='handleRouter'>跳转到Two</el-button>
-        </el-row>
     </div>
 </template>
 
 <script>
+    import {selectHotPage, selectTopPage} from '@/api/video'
     export default {
         comments:{
         },
         methods:{
-            handleRouter(){
-                //路由传递参数，params方式，对应的路由标识必须用name，参数不会出现在url
-                this.$router.push({name:'two',params:{id:1}})
+            selectHotPage(){
+                selectHotPage({size:this.hotSize}).then(resp => {
+                    this.hotList = resp.records
+                })
+            },
+            selectTopPage(){
+                selectTopPage({size:this.topSize}).then(resp => {
+                    this.TopList = resp.records
+                })
             }
         },
         data(){
             return {
                 // 浏览器可视区域大于768，跑马灯使用卡片模式
-                carouselType: ''
+                carouselType: '',
+                hotSize: 4,
+                hotList: null,
+                topSize: 12,
+                topList: null
             }
+        },
+        created(){
+            //分页查询热播电影
+            this.selectHotPage()
+            this.selectTopPage()
         },
         mounted(){
             // 获取浏览器可视区域宽度
